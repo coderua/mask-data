@@ -1,5 +1,5 @@
 {
-  "name": "mask-data",
+  "name": "@coder.ua/mask-data",
   "version": "1.0.0",
   "description": "Masks sensitive data",
   "main": "src/mask-data.js",
@@ -24,5 +24,8 @@
   "bugs": {
     "url": "https://github.com/coderua/mask-data/issues"
   },
-  "homepage": "https://github.com/coderua/mask-data#readme"
+  "homepage": "https://github.com/coderua/mask-data#readme",
+  "directories": {
+    "test": "tests"
+  }
 }
