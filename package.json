@@ -1,0 +1,28 @@
+{
+  "name": "mask-data",
+  "version": "1.0.0",
+  "description": "Masks sensitive data",
+  "main": "src/mask-data.js",
+  "scripts": {
+    "test": "echo \"No test specified yet\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/coderua/mask-data.git"
+  },
+  "keywords": [
+    "mask",
+    "data",
+    "maskdata",
+    "datamask",
+    "mask sensitive",
+    "mask password",
+    "mask string"
+  ],
+  "author": "Volodymyr Chumak <coder.ua@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/coderua/mask-data/issues"
+  },
+  "homepage": "https://github.com/coderua/mask-data#readme"
+}
