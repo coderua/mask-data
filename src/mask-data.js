@@ -2,7 +2,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-unused-vars */
 
-import MaskDataInvalidOptionException from 'src/mask-data-invalid-option-exception';
+import MaskDataInvalidOptionException from './mask-data-invalid-option-exception';
 
 /**
  * Class for masking sensitive data
