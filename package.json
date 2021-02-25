@@ -1,6 +1,6 @@
 {
   "name": "@coder.ua/mask-data",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Masks sensitive data",
   "main": "src/mask-data.js",
   "scripts": {
