@@ -52,7 +52,7 @@ export default class MaskData {
      *
      * @private
      * @param {Object} [maskOptions={}] Mask options. Optional
-     * @returns {{[p: string]: *}}
+     * @returns {{maskNull: boolean, maskString: boolean, maxMaskedChars: number, maskWith: string, unmaskedEndChars: number, maskNumber: boolean, unmaskedStartChars: number, maskUndefined: boolean, maskBoolean: boolean}}
      */
     _mergeWithDefaultValues(maskOptions = {}) {
         const mergedOptions = {
@@ -109,7 +109,6 @@ export default class MaskData {
         }
 
         if (reasons.length > 0) {
-            console.log('Errors => ', reasons);
             throw new MaskDataInvalidOptionException('Invalid mask configuration', reasons);
         }
 
