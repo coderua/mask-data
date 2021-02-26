@@ -24,7 +24,6 @@ export default class MaskDataInvalidOptionException extends Error {
      * @param {Array} [reasons=[]] Error reasons for the error
      */
     constructor(message= 'Invalid mask configuration', reasons = []) {
-        let x = '';
         super(errorMessage(message || 'Invalid mask configuration', reasons));
 
         this.name = this.constructor.name;
