@@ -22,14 +22,28 @@ export default class MaskData {
     /**
      * Getter for a mask default configuration.
      *
-     * @returns {{maxMaskedChars: number, maskWith: string, unmaskedEndChars: number, unmaskedStartChars: number}}
+     * @returns {{maskNull: boolean, maskString: boolean, maxMaskedChars: number, maskWith: string, unmaskedEndChars: number, maskNumber: boolean, unmaskedStartChars: number, maskUndefined: boolean, maskBoolean: boolean}}
      */
     get defaultMaskOptions() {
         return {
+            // A symbol for masking
             maskWith: '*',
+            // Limits the output string length to 16
             maxMaskedChars: 16,
+            // First N symbols that won't be masked
             unmaskedStartChars: 0,
-            unmaskedEndChars: 0
+            // Last N symbols that won't be masked
+            unmaskedEndChars: 0,
+            // Mask data with type 'string'
+            maskString: true,
+            // Mask data with type 'number'
+            maskNumber: true,
+            // Mask data with type 'boolean'
+            maskBoolean: true,
+            // Mask 'undefined' data
+            maskUndefined: true,
+            // Mask 'null' data
+            maskNull: true,
         };
     }
 
@@ -38,7 +52,7 @@ export default class MaskData {
      *
      * @private
      * @param {Object} [maskOptions={}] Mask options. Optional
-     * @returns {{maxMaskedChars: number, maskWith: string, unmaskedEndChars: number, unmaskedStartChars: number}}
+     * @returns {{[p: string]: *}}
      */
     _mergeWithDefaultValues(maskOptions = {}) {
         const mergedOptions = {
@@ -61,7 +75,7 @@ export default class MaskData {
      *
      * @private
      * @param {Object} [maskOptions={}] Mask options to validate
-     * @returns {{maxMaskedChars: number, unmaskedEndChars: number, unmaskedStartChars: number}}
+     * @returns {{maskNull: boolean, maskString: boolean, maxMaskedChars: number, maskWith: string, unmaskedEndChars: number, maskNumber: boolean, unmaskedStartChars: number, maskUndefined: boolean, maskBoolean: boolean}}
      * @throws MaskDataInvalidOptionException
      */
     _validateOptions(maskOptions = {}) {
@@ -73,9 +87,21 @@ export default class MaskData {
             unmaskedEndChars: parseInt(maskOptions.unmaskedEndChars, 10),
         };
 
+        // Options supports positive integers values only
         ['maxMaskedChars', 'unmaskedStartChars', 'unmaskedEndChars']
             .filter((option) => isNaN(normalizedOptions[option]) || normalizedOptions[option] < 0)
             .forEach((option) => reasons.push(`'${option}' option value must be a positive integer.`));
+
+        // Options supports boolean values only
+        [
+            'maskString',
+            'maskNumber',
+            'maskBoolean',
+            'maskUndefined',
+            'maskNull',
+        ]
+            .filter((option) => normalizedOptions[option] !== true && normalizedOptions[option] !== false)
+            .forEach((option) => reasons.push(`'${option}' option value must be a boolean.`));
 
 
         if (!normalizedOptions.maskWith || normalizedOptions.maskWith.toString().length <= 0) {
@@ -91,13 +117,45 @@ export default class MaskData {
     }
 
     /**
-     * Masks sensitive data.
+     * Checks if sensitive data should be masked.
      *
+     * @private
+     * @param {*} sensitiveData
+     * @returns {boolean}
+     */
+    _shouldBeMasked(sensitiveData) {
+        if (sensitiveData === null) {
+            return this.options.maskNull;
+        }
+
+        if (sensitiveData === undefined) {
+            return this.options.maskUndefined;
+        }
+
+        if (sensitiveData === true || sensitiveData === false) {
+            return this.options.maskBoolean;
+        }
+
+        if (typeof sensitiveData === 'string') {
+            return this.options.maskString;
+        }
+
+        if (typeof sensitiveData === 'number') {
+            return this.options.maskNumber;
+        }
+
+        return true;
+    }
+
+    /**
+     * Do all the job to mask a sensitive data.
+     *
+     * @private
      * @param {*} sensitiveData
      * @returns {string|*}
      */
-    mask(sensitiveData) {
-        if (!sensitiveData) {
+    _doMask(sensitiveData) {
+        if (this._shouldBeMasked(sensitiveData) === false) {
             return sensitiveData;
         }
 
@@ -134,5 +192,43 @@ export default class MaskData {
         }
 
         return maskedData;
+    }
+
+    /**
+     * Masks sensitive data.
+     *
+     * Recursive method that support different types of Sensitive Data.
+     * You can provide strings, numbers, booleans, arrays, objects.
+     *
+     * @public
+     * @param {*} sensitiveData
+     * @param {Array} whiteListFields The fields that won't be masked at all. Used if sensitiveData is an object.
+     * @param {Array} blackListFields The fields won't be appeared in a result. Used if sensitiveData is an object
+     * @returns {*}
+     */
+    mask(sensitiveData, whiteListFields = [], blackListFields = []) {
+        if (Array.isArray(sensitiveData)) {
+            return sensitiveData.map((item) => this.mask(item, whiteListFields, blackListFields));
+        }
+
+        if (sensitiveData === undefined || sensitiveData === null) {
+            return this._doMask(sensitiveData);
+        }
+
+        if (typeof sensitiveData === 'object') {
+            const maskedData = {};
+
+            Object.keys(sensitiveData)
+                .filter((key) => !blackListFields.includes(key))
+                .forEach((key) => {
+                    maskedData[key] = whiteListFields.includes(key)
+                        ? sensitiveData[key]
+                        : this.mask(sensitiveData[key], whiteListFields, blackListFields);
+                });
+
+            return maskedData;
+        }
+
+        return this._doMask(sensitiveData);
     }
 }
