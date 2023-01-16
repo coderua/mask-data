@@ -1,4 +1,5 @@
 import MaskData from '../src/mask-data';
+import MaskDataInvalidOptionException from '../src/mask-data-invalid-option-exception';
 
 describe('Tests MaskData class with defaults (Full masking).', () => {
     let instance;
@@ -123,6 +124,22 @@ describe('Tests MaskData class with defaults (Full masking).', () => {
 });
 
 describe('Tests MaskData class with different mask options.', () => {
+    test.each([
+        // Options supports positive integers values only
+        { maxMaskedChars: 'not supported' },
+        { unmaskedStartChars: 'not supported' },
+        { unmaskedEndChars: 'not supported' },
+
+        // Options supports boolean values only
+        { maskString: 'not supported' },
+        { maskNumber: 'not supported' },
+        { maskBoolean: 'not supported' },
+        { maskUndefined: 'not supported' },
+        { maskNull: 'not supported' },
+    ])('it should throw an MaskDataInvalidOptionException if instantiate MaskData with an invalid masking option "%o"', (config) => {
+        expect(() => new MaskData(config)).toThrowError(MaskDataInvalidOptionException);
+    });
+
     test('it should limit masked string to 10 symbols', () => {
         const config = {
             maxMaskedChars: 10
@@ -161,5 +178,45 @@ describe('Tests MaskData class with different mask options.', () => {
         const actual = new MaskData(config).mask('Super_D00per_Secret');
 
         expect(actual).toBe('Super_D00per_Secret');
+    });
+
+    test('it should not mask "undefined" if it is disabled by config', () => {
+        const config = {
+            maskUndefined: false
+        };
+
+        const actual = new MaskData(config).mask(undefined);
+
+        expect(actual).toBe(undefined);
+    });
+
+    test('it should not mask "null" if it is disabled by config', () => {
+        const config = {
+            maskNull: false
+        };
+
+        const actual = new MaskData(config).mask(null);
+
+        expect(actual).toBe(null);
+    });
+
+    test.each([true, false])('it should not mask boolean value "%s" if it is disabled by config', (value) => {
+        const config = {
+            maskBoolean: false
+        };
+
+        const actual = new MaskData(config).mask(value);
+
+        expect(actual).toBe(value);
+    });
+
+    test.each([-1, 0, 1, 2, 3, 10, -0.1, 0.1, 1.5])('it should not mask number value "%s" if it is disabled by config', (value) => {
+        const config = {
+            maskNumber: false
+        };
+
+        const actual = new MaskData(config).mask(value);
+
+        expect(actual).toBe(value);
     });
 });

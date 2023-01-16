@@ -1,5 +1,5 @@
 /**
- * Helper to set a message property in an Error instance.
+ * Helper to set a message property in the MaskDataInvalidOptionException instance.
  *
  * @param {String} message
  * @param {Array} [reasons=[]]

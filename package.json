@@ -1,6 +1,6 @@
 {
   "name": "@coder.ua/mask-data",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Masks sensitive data",
   "main": "dist/mask-data.js",
   "scripts": {
@@ -39,11 +39,13 @@
     "test": "tests"
   },
   "devDependencies": {
-    "@babel/core": "^7.13.1",
-    "@babel/preset-env": "^7.13.5",
-    "babel-jest": "^26.6.3",
-    "eslint": "^7.21.0",
-    "eslint-plugin-jest": "^24.1.5",
-    "jest": "^26.6.3"
+    "@babel/cli": "^7.20.7",
+    "@babel/core": "^7.20.12",
+    "@babel/eslint-parser": "^7.19.1",
+    "@babel/preset-env": "^7.20.2",
+    "babel-jest": "^29.3.1",
+    "eslint": "^8.32.0",
+    "eslint-plugin-jest": "^27.2.1",
+    "jest": "^29.3.1"
   }
 }

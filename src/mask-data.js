@@ -182,7 +182,7 @@ export default class MaskData {
             return maskedData;
         }
 
-        let maskedData = data.substr(0, this.options.unmaskedStartChars);
+        let maskedData = data.substring(0, this.options.unmaskedStartChars);
 
         maskedData += `${this.options.maskWith}`.repeat(maskingCharacters);
 

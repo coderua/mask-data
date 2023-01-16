@@ -1,0 +1,9 @@
+module.exports = {
+    root: true,
+    env: {
+        browser: true,
+        node: true,
+        jest: true,
+    },
+    parser: '@babel/eslint-parser',
+};
