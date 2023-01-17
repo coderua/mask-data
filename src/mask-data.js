@@ -159,10 +159,10 @@ export default class MaskData {
 
     if (maskingCharacters < 0) {
       if (maskLength <= this.options.unmaskedStartChars) {
-        return data.substr(0, maskLength);
+        return data.substring(0, maskLength);
       }
 
-      let maskedData = data.substr(0, this.options.unmaskedStartChars);
+      let maskedData = data.substring(0, this.options.unmaskedStartChars);
       const remainingChars = maskLength - this.options.unmaskedStartChars;
 
       for (let i = data.length - remainingChars; i < data.length; i += 1) {
