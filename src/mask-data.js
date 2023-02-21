@@ -1,108 +1,44 @@
-/* eslint-disable no-restricted-globals */
-/* eslint-disable class-methods-use-this */
-/* eslint-disable no-unused-vars */
+import MaskDataOptions from './mask-data-options';
 
-import MaskDataInvalidOptionException from './mask-data-invalid-option-exception';
+/**
+ * Mask Data Options
+ * @typedef {{maskNull: boolean, maskString: boolean, maxMaskedChars: number, maskWith: string, unmaskedEndChars: number, maskNumber: boolean, unmaskedStartChars: number, maskUndefined: boolean, maskBoolean: boolean}} MaskDataOptionsPojo
+ */
 
 /**
  * Class for masking sensitive data
  */
 export default class MaskData {
   /**
+   * @type {MaskDataOptions}
+   */
+  #options = new MaskDataOptions();
+
+  /**
    * Class constructor
    *
-   * @param {Object} [maskOptions={}] Mask options. Optional. Available options: maskWith, maxMaskedChars, unmaskedStartChars, unmaskedEndChars, maskString, maskNumber, maskBoolean, maskUndefined, maskNull
+   * @param {MaskDataOptions|MaskDataOptionsPojo|Object} [maskOptions={}] Mask options. Optional. Available options: maskWith, maxMaskedChars, unmaskedStartChars, unmaskedEndChars, maskString, maskNumber, maskBoolean, maskUndefined, maskNull
    */
   constructor(maskOptions = {}) {
-    this.options = this._validateOptions(this._mergeWithDefaultValues(maskOptions));
+    this.options = maskOptions;
   }
 
   /**
-   * Getter for a mask default configuration.
+   * Setters for options
    *
-   * @returns {{maskNull: boolean, maskString: boolean, maxMaskedChars: number, maskWith: string, unmaskedEndChars: number, maskNumber: boolean, unmaskedStartChars: number, maskUndefined: boolean, maskBoolean: boolean}}
+   * @param {Object|MaskDataOptions|MaskDataOptionsPojo} options
    */
-  get defaultMaskOptions() {
-    return {
-      // A symbol for masking
-      maskWith: '*',
-      // Limits the output string length to 16
-      maxMaskedChars: 16,
-      // First N symbols that won't be masked
-      unmaskedStartChars: 0,
-      // Last N symbols that won't be masked
-      unmaskedEndChars: 0,
-      // Mask data with type 'string'
-      maskString: true,
-      // Mask data with type 'number'
-      maskNumber: true,
-      // Mask data with type 'boolean'
-      maskBoolean: true,
-      // Mask 'undefined' data
-      maskUndefined: true,
-      // Mask 'null' data
-      maskNull: true,
-    };
+  set options(options) {
+    this.#options.options = options;
   }
 
   /**
-   * Merges provided configuration with a default one.
+   * Getters for options
    *
-   * @private
-   * @param {Object} [maskOptions={}] Mask options. Optional
-   * @returns {{maskNull: boolean, maskString: boolean, maxMaskedChars: number, maskWith: string, unmaskedEndChars: number, maskNumber: boolean, unmaskedStartChars: number, maskUndefined: boolean, maskBoolean: boolean}}
+   * @returns {MaskDataOptions}
    */
-  _mergeWithDefaultValues(maskOptions = {}) {
-    const mergedOptions = {
-      ...this.defaultMaskOptions,
-      ...(typeof maskOptions === 'object' ? maskOptions : {}),
-    };
-
-    Object.keys(this.defaultMaskOptions).forEach((name) => {
-      if (mergedOptions[name] === undefined || mergedOptions[name] === null) {
-        mergedOptions[name] = this.defaultMaskOptions[name];
-      }
-    });
-
-    return mergedOptions;
-  }
-
-  /**
-   * Validates configuration options.
-   *
-   * @private
-   * @param {Object} [maskOptions={}] Mask options to validate
-   * @returns {{maskNull: boolean, maskString: boolean, maxMaskedChars: number, maskWith: string, unmaskedEndChars: number, maskNumber: boolean, unmaskedStartChars: number, maskUndefined: boolean, maskBoolean: boolean}}
-   * @throws MaskDataInvalidOptionException
-   */
-  _validateOptions(maskOptions = {}) {
-    const reasons = [];
-    const normalizedOptions = {
-      ...(typeof maskOptions === 'object' ? maskOptions : {}),
-      maxMaskedChars: parseInt(maskOptions.maxMaskedChars, 10),
-      unmaskedStartChars: parseInt(maskOptions.unmaskedStartChars, 10),
-      unmaskedEndChars: parseInt(maskOptions.unmaskedEndChars, 10),
-    };
-
-    // Options supports positive integers values only
-    ['maxMaskedChars', 'unmaskedStartChars', 'unmaskedEndChars']
-      .filter((option) => isNaN(normalizedOptions[option]) || normalizedOptions[option] < 0)
-      .forEach((option) => reasons.push(`'${option}' option value must be a positive integer.`));
-
-    // Options supports boolean values only
-    ['maskString', 'maskNumber', 'maskBoolean', 'maskUndefined', 'maskNull']
-      .filter((option) => normalizedOptions[option] !== true && normalizedOptions[option] !== false)
-      .forEach((option) => reasons.push(`'${option}' option value must be a boolean.`));
-
-    if (!normalizedOptions.maskWith || normalizedOptions.maskWith.toString().length <= 0) {
-      normalizedOptions.maskWith = this.defaultMaskOptions.maskWith;
-    }
-
-    if (reasons.length > 0) {
-      throw new MaskDataInvalidOptionException('Invalid mask configuration', reasons);
-    }
-
-    return normalizedOptions;
+  get options() {
+    return this.#options;
   }
 
   /**
@@ -112,25 +48,25 @@ export default class MaskData {
    * @param {*} sensitiveData
    * @returns {boolean}
    */
-  _shouldBeMasked(sensitiveData) {
+  #shouldBeMasked(sensitiveData) {
     if (sensitiveData === null) {
-      return this.options.maskNull;
+      return this.#options.maskNull;
     }
 
     if (sensitiveData === undefined) {
-      return this.options.maskUndefined;
+      return this.#options.maskUndefined;
     }
 
     if (sensitiveData === true || sensitiveData === false) {
-      return this.options.maskBoolean;
+      return this.#options.maskBoolean;
     }
 
     if (typeof sensitiveData === 'string') {
-      return this.options.maskString;
+      return this.#options.maskString;
     }
 
     if (typeof sensitiveData === 'number') {
-      return this.options.maskNumber;
+      return this.#options.maskNumber;
     }
 
     return true;
@@ -143,27 +79,27 @@ export default class MaskData {
    * @param {*} sensitiveData
    * @returns {string|*}
    */
-  _doMask(sensitiveData) {
-    if (this._shouldBeMasked(sensitiveData) === false) {
+  #doMask(sensitiveData) {
+    if (this.#shouldBeMasked(sensitiveData) === false) {
       return sensitiveData;
     }
 
     const data = typeof sensitiveData === 'string' ? sensitiveData : String(sensitiveData);
     let maskLength = data.length;
 
-    if (data.length > this.options.maxMaskedChars) {
-      maskLength = parseInt(this.options.maxMaskedChars, 10);
+    if (data.length > this.#options.maxMaskedChars) {
+      maskLength = parseInt(this.#options.maxMaskedChars, 10);
     }
 
-    const maskingCharacters = maskLength - this.options.unmaskedStartChars - this.options.unmaskedEndChars;
+    const maskingCharacters = maskLength - this.#options.unmaskedStartChars - this.#options.unmaskedEndChars;
 
     if (maskingCharacters < 0) {
-      if (maskLength <= this.options.unmaskedStartChars) {
+      if (maskLength <= this.#options.unmaskedStartChars) {
         return data.substring(0, maskLength);
       }
 
-      let maskedData = data.substring(0, this.options.unmaskedStartChars);
-      const remainingChars = maskLength - this.options.unmaskedStartChars;
+      let maskedData = data.substring(0, this.#options.unmaskedStartChars);
+      const remainingChars = maskLength - this.#options.unmaskedStartChars;
 
       for (let i = data.length - remainingChars; i < data.length; i += 1) {
         maskedData += data[i];
@@ -172,11 +108,11 @@ export default class MaskData {
       return maskedData;
     }
 
-    let maskedData = data.substring(0, this.options.unmaskedStartChars);
+    let maskedData = data.substring(0, this.#options.unmaskedStartChars);
 
-    maskedData += `${this.options.maskWith}`.repeat(maskingCharacters);
+    maskedData += `${this.#options.maskWith}`.repeat(maskingCharacters);
 
-    for (let i = data.length - this.options.unmaskedEndChars; i < data.length; i += 1) {
+    for (let i = data.length - this.#options.unmaskedEndChars; i < data.length; i += 1) {
       maskedData += data[i];
     }
 
@@ -201,7 +137,7 @@ export default class MaskData {
     }
 
     if (sensitiveData === undefined || sensitiveData === null) {
-      return this._doMask(sensitiveData);
+      return this.#doMask(sensitiveData);
     }
 
     if (typeof sensitiveData === 'object') {
@@ -218,6 +154,6 @@ export default class MaskData {
       return maskedData;
     }
 
-    return this._doMask(sensitiveData);
+    return this.#doMask(sensitiveData);
   }
 }

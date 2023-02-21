@@ -13,7 +13,7 @@ $ npm install @coder.ua/mask-data
 ### Mask data with zero configuration
 
 ```javascript
-import MaskData from '@coder.ua/mask-data';
+import { MaskData } from '@coder.ua/mask-data';
 
 const maskedData = new MaskData().mask('Your sensitive data to mask.');
 
@@ -45,21 +45,80 @@ const options = {
 };
 ```
 
-### Mask data with configuration
+### Mask data with plain object configuration
 
 ```javascript
-import MaskData from '@coder.ua/mask-data';
+import { MaskData } from '@coder.ua/mask-data';
 
-const config = { maskWith: 'X', maxMaskedChars: 10, unmaskedStartChars: 2, unmaskedEndChars: 3 };
-const maskedData = new MaskData(config).mask('Your sensitive data to mask.');
+const options = { maskWith: 'X', maxMaskedChars: 10, unmaskedStartChars: 2, unmaskedEndChars: 3 };
+const maskedData = new MaskData(options).mask('Your sensitive data to mask.');
 
 // maskedData => 'YoXXXXXask'
+```
+
+### Mask data with object configuration
+
+```javascript
+import { MaskData, MaskDataOptions } from '@coder.ua/mask-data';
+
+const options = new MaskDataOptions({
+  maskWith: 'X',
+  maxMaskedChars: 10,
+  unmaskedStartChars: 2,
+  unmaskedEndChars: 3,
+});
+
+const maskedData = new MaskData(options).mask('Your sensitive data to mask.');
+
+// maskedData => 'YoXXXXXask'
+```
+
+### Update MaskDataOptions on an existent instance
+
+```javascript
+import { MaskData, MaskDataOptions } from '@coder.ua/mask-data';
+
+const options = new MaskDataOptions({
+  maskWith: 'X',
+  maxMaskedChars: 10,
+  unmaskedStartChars: 2,
+  unmaskedEndChars: 3,
+});
+
+const maskedData = new MaskData(options);
+// Updates only provided options
+maskedData.options = { maskWith: 'x', maxMaskedChars: 24, unmaskedStartChars: 2 };
+
+maskedData.mask('Your sensitive data to mask.');
+
+// maskedData => 'Yoxxxxxxxxxxxxxxxxxxxsk.'
+```
+
+### Set MaskDataOptions on an existent instance
+
+```javascript
+import { MaskData, MaskDataOptions } from '@coder.ua/mask-data';
+
+const options = new MaskDataOptions({
+  maskWith: '~',
+  maxMaskedChars: 10,
+  unmaskedStartChars: 2,
+  unmaskedEndChars: 3,
+});
+
+const maskedData = new MaskData(options);
+// Reset existing options and merge new options with default ones
+maskedData.options = new MaskDataOptions({ maskWith: 'x', maxMaskedChars: 24, unmaskedStartChars: 2 });
+
+maskedData.mask('Your sensitive data to mask.');
+
+// maskedData => 'Yoxxxxxxxxxxxxxxxxxxxxxx.'
 ```
 
 ### Mask nested object values
 
 ```javascript
-import MaskData from '@coder.ua/mask-data';
+import { MaskData } from '@coder.ua/mask-data';
 
 const sensitiveData = {
   key1: 'secret1',
@@ -94,7 +153,7 @@ maskedData =>
 ### Mask nested array values
 
 ```javascript
-import MaskData from '@coder.ua/mask-data';
+import { MaskData } from '@coder.ua/mask-data';
 
 const sensitiveData = [
   'secret1',

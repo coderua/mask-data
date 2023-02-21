@@ -1,7 +1,7 @@
 import MaskData from '../src/mask-data';
-import MaskDataInvalidOptionException from '../src/mask-data-invalid-option-exception';
+import MaskDataOptions from '../src/mask-data-options';
 
-describe('Tests MaskData class with defaults (Full masking).', () => {
+describe('Tests MaskData class with defaults', () => {
   let instance;
 
   beforeEach(() => {
@@ -27,7 +27,10 @@ describe('Tests MaskData class with defaults (Full masking).', () => {
     };
 
     // 2. Assert
-    expect(instance.defaultMaskOptions).toStrictEqual(expected);
+    expect(instance.options).toBeInstanceOf(MaskDataOptions);
+    expect(instance.options.toPojo()).toStrictEqual(expected);
+    expect(instance.options.toJSON()).toStrictEqual(expected);
+    expect(instance.options.toString()).toStrictEqual(JSON.stringify(expected));
   });
 
   test('it should mask strings', () => {
@@ -104,104 +107,195 @@ describe('Tests MaskData class with defaults (Full masking).', () => {
   });
 });
 
-describe('Tests MaskData class with different mask options.', () => {
-  test.each([
-    // Options supports positive integers values only
-    { maxMaskedChars: 'not supported' },
-    { unmaskedStartChars: 'not supported' },
-    { unmaskedEndChars: 'not supported' },
+describe('Tests MaskData class setting masking options', () => {
+  test('it should should update only new options for the MaskData instance created with defaults', () => {
+    // 1. Act
+    const instance = new MaskData();
+    instance.options = { maskWith: 'x', maxMaskedChars: 24, unmaskedStartChars: 2 };
 
-    // Options supports boolean values only
-    { maskString: 'not supported' },
-    { maskNumber: 'not supported' },
-    { maskBoolean: 'not supported' },
-    { maskUndefined: 'not supported' },
-    { maskNull: 'not supported' },
-  ])(
-    'it should throw an MaskDataInvalidOptionException if instantiate MaskData with an invalid masking option "%o"',
-    (config) => {
-      expect(() => new MaskData(config)).toThrowError(MaskDataInvalidOptionException);
-    }
-  );
-
-  test('it should limit masked string to 10 symbols', () => {
-    const config = {
-      maxMaskedChars: 10,
-    };
-
-    const actual = new MaskData(config).mask('Super_D00per_Secret');
-
-    expect(actual.length).toBe(config.maxMaskedChars);
-  });
-
-  test('it should left unmasked 2 symbols at the start of a string', () => {
-    const config = {
+    const expected = {
+      ...MaskDataOptions.defaultOptions,
+      maskWith: 'x',
+      maxMaskedChars: 24,
       unmaskedStartChars: 2,
     };
 
-    const actual = new MaskData(config).mask('Super_D00per_Secret');
+    // 2. Assert
+    expect(instance.options).toBeInstanceOf(MaskDataOptions);
+    expect(instance.options.toPojo()).toStrictEqual(expected);
+    expect(instance.options.toJSON()).toStrictEqual(expected);
+    expect(instance.options.toString()).toStrictEqual(JSON.stringify(expected));
+  });
+
+  test('it should should update only new options for the MaskData instance created with custom options', () => {
+    // 1. Arrange and Act
+    const instance = new MaskData({
+      maskWith: '*',
+      maxMaskedChars: 16,
+      unmaskedStartChars: 0,
+      unmaskedEndChars: 0,
+      maskString: false,
+      maskNumber: false,
+      maskBoolean: false,
+      maskUndefined: false,
+      maskNull: false,
+    });
+    instance.options = { maskWith: 'x', maxMaskedChars: 24, unmaskedStartChars: 2 };
+    instance.options = { maskNull: true };
+
+    const expected = {
+      maskWith: 'x',
+      maxMaskedChars: 24,
+      unmaskedStartChars: 2,
+      unmaskedEndChars: 0,
+      maskString: false,
+      maskNumber: false,
+      maskBoolean: false,
+      maskUndefined: false,
+      maskNull: true,
+    };
+
+    // 3. Assert
+    expect(instance.options).toBeInstanceOf(MaskDataOptions);
+    expect(instance.options.toPojo()).toStrictEqual(expected);
+    expect(instance.options.toJSON()).toStrictEqual(expected);
+    expect(instance.options.toString()).toStrictEqual(JSON.stringify(expected));
+  });
+
+  test('it should set new MaskDataOptions for the MaskData instance', () => {
+    // 1. Arrange
+    const options = {
+      maskWith: '*',
+      maxMaskedChars: 16,
+      unmaskedStartChars: 0,
+      unmaskedEndChars: 0,
+      maskString: false,
+      maskNumber: false,
+      maskBoolean: false,
+      maskUndefined: false,
+      maskNull: false,
+    };
+
+    // 2. Act
+    const instance = new MaskData(options);
+    instance.options = { maskWith: 'x', maxMaskedChars: 24, unmaskedStartChars: 2 };
+    instance.options = { maskNull: true };
+    instance.options = new MaskDataOptions({ maskNumber: true });
+
+    const expected = {
+      ...MaskDataOptions.defaultOptions,
+      maskNumber: true,
+    };
+
+    // 3. Assert
+    expect(instance.options).toBeInstanceOf(MaskDataOptions);
+    expect(instance.options.toPojo()).toStrictEqual(expected);
+    expect(instance.options.toJSON()).toStrictEqual(expected);
+    expect(instance.options.toString()).toStrictEqual(JSON.stringify(expected));
+  });
+});
+
+describe('Tests MaskData class with different mask options.', () => {
+  test('it should return custom Mask Options for instance', () => {
+    // 1. Arrange
+    const options = {
+      maskWith: '*',
+      maxMaskedChars: 16,
+      unmaskedStartChars: 0,
+      unmaskedEndChars: 0,
+      maskString: false,
+      maskNumber: false,
+      maskBoolean: false,
+      maskUndefined: false,
+      maskNull: false,
+    };
+
+    // 2. Act
+    const instance = new MaskData(options);
+
+    // 3. Assert
+    expect(instance.options).toBeInstanceOf(MaskDataOptions);
+    expect(instance.options.toPojo()).toStrictEqual(options);
+  });
+
+  test('it should limit masked string to 10 symbols', () => {
+    const options = {
+      maxMaskedChars: 10,
+    };
+
+    const actual = new MaskData(options).mask('Super_D00per_Secret');
+
+    expect(actual.length).toBe(options.maxMaskedChars);
+  });
+
+  test('it should left unmasked 2 symbols at the start of a string', () => {
+    const options = {
+      unmaskedStartChars: 2,
+    };
+
+    const actual = new MaskData(options).mask('Super_D00per_Secret');
 
     expect(actual).toBe('Su**************');
   });
 
   test('it should left unmasked 3 symbols at the end of a string', () => {
-    const config = {
+    const options = {
       unmaskedEndChars: 3,
     };
 
-    const actual = new MaskData(config).mask('Super_D00per_Secret');
+    const actual = new MaskData(options).mask('Super_D00per_Secret');
 
     expect(actual).toBe('*************ret');
   });
 
-  test('it should not mask a string if it is disabled by config', () => {
-    const config = {
+  test('it should not mask a string if it is disabled by options', () => {
+    const options = {
       maskString: false,
     };
 
-    const actual = new MaskData(config).mask('Super_D00per_Secret');
+    const actual = new MaskData(options).mask('Super_D00per_Secret');
 
     expect(actual).toBe('Super_D00per_Secret');
   });
 
-  test('it should not mask "undefined" if it is disabled by config', () => {
-    const config = {
+  test('it should not mask "undefined" if it is disabled by options', () => {
+    const options = {
       maskUndefined: false,
     };
 
-    const actual = new MaskData(config).mask(undefined);
+    const actual = new MaskData(options).mask(undefined);
 
     expect(actual).toBe(undefined);
   });
 
-  test('it should not mask "null" if it is disabled by config', () => {
-    const config = {
+  test('it should not mask "null" if it is disabled by options', () => {
+    const options = {
       maskNull: false,
     };
 
-    const actual = new MaskData(config).mask(null);
+    const actual = new MaskData(options).mask(null);
 
     expect(actual).toBe(null);
   });
 
-  test.each([true, false])('it should not mask boolean value "%s" if it is disabled by config', (value) => {
-    const config = {
+  test.each([true, false])('it should not mask boolean value "%s" if it is disabled by options', (value) => {
+    const options = {
       maskBoolean: false,
     };
 
-    const actual = new MaskData(config).mask(value);
+    const actual = new MaskData(options).mask(value);
 
     expect(actual).toBe(value);
   });
 
   test.each([-1, 0, 1, 2, 3, 10, -0.1, 0.1, 1.5])(
-    'it should not mask number value "%s" if it is disabled by config',
+    'it should not mask number value "%s" if it is disabled by options',
     (value) => {
-      const config = {
+      const options = {
         maskNumber: false,
       };
 
-      const actual = new MaskData(config).mask(value);
+      const actual = new MaskData(options).mask(value);
 
       expect(actual).toBe(value);
     }
