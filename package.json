@@ -1,10 +1,21 @@
 {
   "name": "@coder.ua/mask-data",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Masks sensitive data",
-  "main": "dist/index.js",
+  "type": "module",
+  "main": "dist/mask-data.cjs.js",
+  "module": "dist/mask-data.esm.js",
+  "unpkg": "dist/mask-data.umd.js",
+  "jsdelivr": "dist/mask-data.umd.js",
+  "exports": {
+    ".": {
+      "require": "./dist/mask-data.cjs.js",
+      "import": "./dist/mask-data.esm.js",
+      "umd": "./dist/mask-data.umd.js"
+    }
+  },
   "scripts": {
-    "build": "babel --delete-dir-on-start --minified src -d dist --source-maps",
+    "build": "rollup -c",
     "lint": "eslint --ext .js .",
     "format": "prettier --write --list-different .",
     "lintfix": "npm run format && npm run lint -- --fix",
@@ -41,15 +52,21 @@
     "test": "tests"
   },
   "devDependencies": {
-    "@babel/cli": "^7.20.7",
-    "@babel/core": "^7.20.12",
+    "@babel/cli": "^7.21.0",
+    "@babel/core": "^7.21.0",
     "@babel/eslint-parser": "^7.19.1",
+    "@babel/plugin-transform-runtime": "^7.21.0",
     "@babel/preset-env": "^7.20.2",
-    "babel-jest": "^29.3.1",
-    "eslint": "^8.32.0",
-    "eslint-config-prettier": "^8.6.0",
+    "@rollup/plugin-babel": "^6.0.3",
+    "@rollup/plugin-commonjs": "^24.0.1",
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "@rollup/plugin-terser": "^0.4.0",
+    "babel-jest": "^29.5.0",
+    "eslint": "^8.36.0",
+    "eslint-config-prettier": "^8.7.0",
     "eslint-plugin-jest": "^27.2.1",
-    "jest": "^29.3.1",
-    "prettier": "^2.8.3"
+    "jest": "^29.5.0",
+    "prettier": "^2.8.4",
+    "rollup": "^3.19.1"
   }
 }
