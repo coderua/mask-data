@@ -7,7 +7,8 @@ export default {
   input: 'src/main.js',
   output: [
     {
-      file: 'dist/mask-data.cjs.js',
+      // `.cjs`: the package is `"type": "module"`, so Node.js loads every `.js` file in it as an ES module
+      file: 'dist/mask-data.cjs',
       format: 'cjs',
       sourcemap: true,
     },
